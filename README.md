@@ -1,5 +1,8 @@
 # 🧠 Customer Segmentation Web App
 
+🔗 **Live Demo**: [Visit the App](https://13019370-de69-44ce-b075-8ca500fab23e-00-2v7s0ndn5domp.sisko.replit.dev/)
+
+
 An interactive web application that performs customer segmentation using KMeans clustering. Designed to help businesses better understand their customers based on demographic and spending behavior.
 
 ---
