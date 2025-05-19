@@ -1,108 +1,187 @@
 {% extends "base.html" %}
 
 {% block content %}
-    <div class="row mb-4">
-        <div class="col-md-8 mx-auto text-center">
-            <h1 class="display-5 fw-bold mb-3" style="color: var(--primary);">Customer Segmentation Dashboard</h1>
-            <p class="lead">Analyze customer behavior and identify key segments for targeted marketing</p>
-        </div>
+<style>
+  :root {
+    --primary: #3a86ff;       /* Bright Blue */
+    --secondary: #8338ec;     /* Purple */
+    --form-bg: #f7f9fc;       /* Light gray-blue background */
+    --input-border: #ced4da;  /* Default input border */
+    --input-focus: var(--primary);
+  }
+
+  .form-section {
+    background: var(--form-bg);
+    border-radius: 10px;
+    padding: 25px;
+    box-shadow: 0 6px 15px rgba(58, 134, 255, 0.15);
+    margin-bottom: 30px;
+    transition: box-shadow 0.3s ease;
+  }
+  .form-section:hover {
+    box-shadow: 0 8px 20px rgba(58, 134, 255, 0.3);
+  }
+  .form-section h3 {
+    color: var(--pimaryr);
+    font-weight: 700;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+  }
+  .form-label {
+    font-weight: 600;
+    color: var(--pimaryr);
+  }
+  input.form-control,
+  select.form-select {
+    border: 2px solid var(--input-border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  }
+  input.form-control:focus,
+  select.form-select:focus {
+    border-color: var(--input-focus);
+    box-shadow: 0 0 8px rgba(58, 134, 255, 0.4);
+    outline: none;
+  }
+  .btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  .btn-primary:hover {
+    background-color: var(--accent);
+    border-color: var(--accent);
+  }
+  .btn-secondary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+    font-weight: 600;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+  }
+  .btn-secondary:hover {
+    background-color: var(--accent);
+    border-color: var(--accent);
+  }
+  small.text-muted {
+    color: #6c757d;
+  }
+  p.text-center.text-muted.my-3 {
+    font-style: italic;
+  }
+</style>
+
+<div class="row mb-5">
+    <div class="col-md-8 mx-auto text-center">
+        <h1 class="display-5 fw-bold mb-3" style="color: var(--primary);">
+            Customer Segmentation Dashboard
+        </h1>
+        <p class="lead text-secondary">Analyze customer behavior and identify key segments for targeted marketing</p>
     </div>
-    
-    <div class="row">
-        <div class="col-lg-5">
-            <div class="form-section">
-                <h3><i class="bi bi-person-lines-fill me-2"></i>Individual Customer Analysis</h3>
-                <form method="POST" action="/">
-                    <div class="mb-3">
-                        <label class="form-label">Customer ID</label>
-                        <input type="number" class="form-control" name="customer_id" placeholder="Enter Customer ID">
-                        <small class="text-muted">Find an existing customer from the dataset</small>
-                    </div>
-                    <p class="text-center text-muted my-3">- OR -</p>
-                    <div class="mb-3">
-                        <label class="form-label">Age</label>
-                        <input type="number" class="form-control" name="age" placeholder="Enter age">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Annual Income (k$)</label>
-                        <input type="number" class="form-control" name="income" placeholder="Enter annual income">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Spending Score (1-100)</label>
-                        <input type="number" class="form-control" name="spending" min="1" max="100" placeholder="Enter spending score">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label">Gender (Optional)</label>
-                        <select class="form-select" name="gender">
-                            <option value="">Select Gender</option>
-                            <option value="Male">Male</option>
-                            <option value="Female">Female</option>
-                        </select>
-                    </div>
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-search me-2"></i>Analyze Customer
-                    </button>
-                </form>
-            </div>
-            
-            <div class="form-section">
-                <h3><i class="bi bi-upload me-2"></i>Bulk Processing</h3>
-                <form method="POST" action="/upload" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label class="form-label">Upload Customer Data (Excel)</label>
-                        <input class="form-control" type="file" name="file" accept=".xlsx,.xls">
-                        <small class="text-muted">Upload an Excel file with customer data</small>
-                    </div>
-                    <button type="submit" class="btn btn-secondary w-100">
-                        <i class="bi bi-cloud-arrow-up me-2"></i>Upload and Process
-                    </button>
-                </form>
-            </div>
-        </div>
-        
-        <div class="col-lg-7">
-            <div class="visualization">
-                <h3><i class="bi bi-3-circle me-2"></i>3D Cluster Visualization</h3>
-                <div class="ratio ratio-16x9">
-                    {{ plot_3d|safe }}
+</div>
+
+<div class="row">
+    <div class="col-lg-5">
+        <div class="form-section">
+            <h3><i class="bi bi-person-lines-fill me-2"></i>Individual Customer Analysis</h3>
+            <form method="POST" action="/">
+                <div class="mb-4">
+                    <label class="form-label" for="customer_id">Customer ID</label>
+                    <input type="number" class="form-control" id="customer_id" name="customer_id" placeholder="Enter Customer ID">
+                    <small class="text-muted">Find an existing customer from the dataset</small>
                 </div>
+
+                <p class="text-center text-muted my-3">- OR -</p>
+
+                <div class="mb-3">
+                    <label class="form-label" for="age">Age</label>
+                    <input type="number" class="form-control" id="age" name="age" placeholder="Enter age" min="0" max="120">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="income">Annual Income ($)</label>
+                    <input type="number" class="form-control" id="income" name="income" placeholder="Enter annual income" min="0" step="any">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="spending">Spending Score (1-100)</label>
+                    <input type="number" class="form-control" id="spending" name="spending" min="1" max="100" placeholder="Enter spending score">
+                </div>
+                <div class="mb-4">
+                    <label class="form-label" for="gender">Gender (Optional)</label>
+                    <select class="form-select" id="gender" name="gender">
+                        <option value="" selected>Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                    </select>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100">
+                    <i class="bi bi-search me-2"></i>Analyze Customer
+                </button>
+            </form>
+        </div>
+
+        <div class="form-section">
+            <h3><i class="bi bi-upload me-2"></i>Bulk Processing</h3>
+            <form method="POST" action="/upload" enctype="multipart/form-data">
+                <div class="mb-3">
+                    <label class="form-label" for="file">Upload Customer Data (Excel)</label>
+                    <input class="form-control" type="file" id="file" name="file" accept=".xlsx,.xls">
+                    <small class="text-muted">Upload an Excel file with customer data</small>
+                </div>
+                <button type="submit" class="btn btn-secondary w-100">
+                    <i class="bi bi-cloud-arrow-up me-2"></i>Upload and Process
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <div class="visualization">
+            <h3 class="mb-3" style="color: var(--primary);"><i class="bi bi-3-circle me-2"></i>3D Cluster Visualization</h3>
+            <div class="ratio ratio-16x9 rounded shadow-sm border">
+                {{ plot_3d|safe }}
             </div>
         </div>
     </div>
-    
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="visualization">
-                <h3><i class="bi bi-graph-down me-2"></i>Elbow Method</h3>
-                <img src="data:image/png;base64,{{ elbow_plot }}" class="img-fluid rounded">
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="visualization">
-                <h3><i class="bi bi-grid-3x3 me-2"></i>Feature Correlation</h3>
-                <img src="data:image/png;base64,{{ correlation_plot }}" class="img-fluid rounded">
-            </div>
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="visualization">
+            <h3 class="mb-3" style="color: var(--primary);"><i class="bi bi-graph-down me-2"></i>Elbow Method</h3>
+            <img src="data:image/png;base64,{{ elbow_plot }}" class="img-fluid rounded shadow-sm border">
         </div>
     </div>
-    
-    <div class="row mt-4">
-        <div class="col-md-6">
-            <div class="visualization">
-                <h3><i class="bi bi-bar-chart-line me-2"></i>Income vs Spending</h3>
-                <img src="data:image/png;base64,{{ income_spending_plot }}" class="img-fluid rounded">
-            </div>
-        </div>
-        <div class="col-md-6">
-            <div class="visualization">
-                <h3><i class="bi bi-person-vcard me-2"></i>Age Distribution</h3>
-                <img src="data:image/png;base64,{{ age_dist_plot }}" class="img-fluid rounded">
-            </div>
+    <div class="col-md-6">
+        <div class="visualization">
+            <h3 class="mb-3" style="color: var(--primary);"><i class="bi bi-grid-3x3 me-2"></i>Feature Correlation</h3>
+            <img src="data:image/png;base64,{{ correlation_plot }}" class="img-fluid rounded shadow-sm border">
         </div>
     </div>
-    
-    <div class="visualization mt-4">
-        <h3><i class="bi bi-table me-2"></i>Cluster Profiles</h3>
-        <img src="data:image/png;base64,{{ cluster_heatmap }}" class="img-fluid rounded mb-3">
-        {{ cluster_profiles|safe }}
+</div>
+
+<div class="row mt-5">
+    <div class="col-md-6">
+        <div class="visualization">
+            <h3 class="mb-3" style="color: var(--primary);"><i class="bi bi-bar-chart-line me-2"></i>Income vs Spending</h3>
+            <img src="data:image/png;base64,{{ income_spending_plot }}" class="img-fluid rounded shadow-sm border">
+        </div>
     </div>
+    <div class="col-md-6">
+        <div class="visualization">
+            <h3 class="mb-3" style="color: var(--primary);"><i class="bi bi-person-vcard me-2"></i>Age Distribution</h3>
+            <img src="data:image/png;base64,{{ age_dist_plot }}" class="img-fluid rounded shadow-sm border">
+        </div>
+    </div>
+</div>
+
+<div class="visualization mt-5">
+    <h3 class="mb-3" style="color: var(--primary);"><i class="bi bi-table me-2"></i>Cluster Profiles</h3>
+    <img src="data:image/png;base64,{{ cluster_heatmap }}" class="img-fluid rounded mb-3 shadow-sm border">
+    {{ cluster_profiles|safe }}
+</div>
 {% endblock %}

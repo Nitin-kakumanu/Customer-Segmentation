@@ -29,7 +29,15 @@
                         <h5 class="alert-heading">Cluster Assignment</h5>
                         <p class="mb-1"><strong>Cluster:</strong> <span class="badge bg-primary">{{ cluster }}</span></p>
                         <hr>
-                        <p class="mb-0"><strong>Recommendation:</strong> {{ recommendation }}</p>
+<p class="mb-2"><strong>Recommendations:</strong></p>
+<ul class="list-group list-group-flush mb-0">
+    {% for rec in recommendation %}
+    <li class="list-group-item d-flex align-items-start">
+        <i class="bi bi-lightbulb-fill text-warning me-2 mt-1"></i>
+        <span>{{ rec }}</span>
+    </li>
+    {% endfor %}
+</ul>
                     </div>
                     
                     <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">

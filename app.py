@@ -52,17 +52,33 @@ dataset, kmeans, scaler, features = load_data()
 
 # Recommendation mapping
 recommendations = {
-0: "Target with luxury items and premium services (High income, high spending)",
-1: "Offer budget-friendly options and value deals (Low income, high spending)",
-2: "Focus on quality essentials and mid-range products (Medium income, medium spending)",
-3: "Provide savings plans and investment options (High income, low spending)",
-4: "Suggest trendy, affordable fashion (Young, medium spending)",
-5: "Introduce loyalty programs and discounts to retain this cautious spender group (Low income, low spending)",
-6: "Highlight travel, lifestyle, and digital services (Young, high spending, mid income)",
-7: "Promote premium education and family-focused products (Middle-aged, high income, moderate spending)",
-8: "Offer credit products and financial advice (Recently joined customers with high income but low engagement)",
-9: "Upsell luxury memberships and VIP experiences (Very high income and spending, frequent buyers)"
+    0: [
+        "Target with luxury items and premium services.",
+        "Offer VIP loyalty programs and concierge support.",
+        "Highlight high-end lifestyle products and experiences."
+    ],
+    1: [
+        "Offer budget-friendly options and value deals.",
+        "Use cashback incentives and reward programs.",
+        "Promote discounts on essential and entertainment products."
+    ],
+    2: [
+        "Focus on quality essentials and mid-range products.",
+        "Bundle services to increase perceived value.",
+        "Introduce family-oriented and practical offerings."
+    ],
+    3: [
+        "Provide savings plans and investment options.",
+        "Promote financial literacy products and tools.",
+        "Introduce exclusive, low-risk investment services."
+    ],
+    4: [
+        "Suggest trendy, affordable fashion.",
+        "Use influencer marketing and social media campaigns.",
+        "Highlight student discounts and seasonal promotions."
+    ]
 }
+
 
 
 # Helper function to plot to base64
@@ -123,67 +139,89 @@ def generate_visualizations():
         'income_spending_plot': income_spending_plot,
         'cluster_profiles': cluster_profiles
     }
-
+    
+    
 @app.route('/', methods=['GET', 'POST'])
 def index():
     if request.method == 'POST':
-        if 'customer_id' in request.form:
-            customer_id = int(request.form['customer_id'])
-            if customer_id in dataset['Customer ID'].values:
-                cluster = dataset.loc[dataset['Customer ID'] == customer_id, 'Cluster'].values[0]
-                return render_template('result.html', 
-                                    customer_id=customer_id,
-                                    cluster=cluster,
-                                    recommendation=recommendations.get(cluster, "No specific recommendation"),
-                                    show_individual=True,
-                                    color_palette=COLOR_PALETTE,
-                                    now=datetime.now())
-        
-        elif 'age' in request.form:
-            age = float(request.form['age'])
-            income = float(request.form['income'])
-            spending = float(request.form['spending'])
-            gender = request.form.get('gender', '')
-            
-            new_data = pd.DataFrame([[age, income, spending, spending/income]], 
-                                  columns=['Age', 'Annual Income', 'Spending Score(1-100)', 'Spending_to_Income_Ratio'])
-            new_data_scaled = scaler.transform(new_data)
-            cluster = kmeans.predict(new_data_scaled)[0]
-            
-            return render_template('result.html',
-                                age=age,
-                                income=income,
-                                spending=spending,
-                                gender=gender,
-                                cluster=cluster,
-                                recommendation=recommendations.get(cluster, "No specific recommendation"),
-                                show_individual=True,
-                                color_palette=COLOR_PALETTE,
-                                now=datetime.now())
-    
+        customer_id_raw = request.form.get('customer_id', '').strip()
+        age_raw = request.form.get('age', '').strip()
+        income_raw = request.form.get('income', '').strip()
+        spending_raw = request.form.get('spending', '').strip()
+        gender = request.form.get('gender', '').strip()
+
+        # If Customer ID is provided, use it
+        if customer_id_raw:
+            try:
+                customer_id = int(customer_id_raw)
+                if customer_id in dataset['Customer ID'].values:
+                    cluster = dataset.loc[dataset['Customer ID'] == customer_id, 'Cluster'].values[0]
+                    return render_template('result.html', 
+                                           customer_id=customer_id,
+                                           cluster=cluster,
+                                           recommendation=recommendations.get(cluster, "No specific recommendation"),
+                                           show_individual=True,
+                                           color_palette=COLOR_PALETTE,
+                                           now=datetime.now())
+                else:
+                    return f"Customer ID {customer_id} not found."
+            except ValueError:
+                return "Invalid Customer ID. Please enter a number."
+
+        # If age, income, and spending are provided, predict cluster
+        elif age_raw and income_raw and spending_raw:
+            try:
+                age = float(age_raw)
+                income = float(income_raw)
+                spending = float(spending_raw)
+
+                # Avoid divide-by-zero
+                ratio = spending / income if income != 0 else 0
+
+                new_data = pd.DataFrame([[age, income, spending, ratio]],
+                                        columns=['Age', 'Annual Income', 'Spending Score(1-100)', 'Spending_to_Income_Ratio'])
+                new_data_scaled = scaler.transform(new_data)
+                cluster = kmeans.predict(new_data_scaled)[0]
+
+                return render_template('result.html',
+                                       age=age,
+                                       income=income,
+                                       spending=spending,
+                                       gender=gender,
+                                       cluster=cluster,
+                                       recommendation=recommendations.get(cluster, "No specific recommendation"),
+                                       show_individual=True,
+                                       color_palette=COLOR_PALETTE,
+                                       now=datetime.now())
+            except ValueError:
+                return "Invalid numeric input. Please check the age, income, and spending fields."
+
+        else:
+            return "Please enter either Customer ID or age, income, and spending score to proceed."
+
+    # GET method
     visualizations = generate_visualizations()
-    
-    # 3D Plot
+
     fig_3d = px.scatter_3d(dataset, 
-                          x='Annual Income', 
-                          y='Spending Score(1-100)', 
-                          z='Age',
-                          color='Cluster',
-                          hover_data=['Gender'],
-                          title='3D Cluster Visualization',
-                          color_continuous_scale='tealrose')
+                           x='Annual Income', 
+                           y='Spending Score(1-100)', 
+                           z='Age',
+                           color='Cluster',
+                           hover_data=['Gender'],
+                           title='3D Cluster Visualization',
+                           color_continuous_scale='tealrose')
     plot_3d = fig_3d.to_html(full_html=False)
-    
+
     return render_template('index.html',
-                         elbow_plot=visualizations['elbow_plot'],
-                         correlation_plot=visualizations['correlation_plot'],
-                         plot_3d=plot_3d,
-                         cluster_heatmap=visualizations['cluster_heatmap'],
-                         age_dist_plot=visualizations['age_dist_plot'],
-                         income_spending_plot=visualizations['income_spending_plot'],
-                         cluster_profiles=visualizations['cluster_profiles'].to_html(classes='table table-striped'),
-                         color_palette=COLOR_PALETTE,
-                         now=datetime.now())
+                           elbow_plot=visualizations['elbow_plot'],
+                           correlation_plot=visualizations['correlation_plot'],
+                           plot_3d=plot_3d,
+                           cluster_heatmap=visualizations['cluster_heatmap'],
+                           age_dist_plot=visualizations['age_dist_plot'],
+                           income_spending_plot=visualizations['income_spending_plot'],
+                           cluster_profiles=visualizations['cluster_profiles'].to_html(classes='table table-striped'),
+                           color_palette=COLOR_PALETTE,
+                           now=datetime.now())
 
 @app.route('/explore', methods=['GET', 'POST'])
 def explore():
