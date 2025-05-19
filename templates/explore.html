@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto text-center">
+            <h1 class="display-5 fw-bold mb-3" style="color: var(--primary);">Graph Explorer</h1>
+            <p class="lead">Interactive visualization of customer segmentation data</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="graph-selector">
+                <h3><i class="bi bi-sliders me-2"></i>Graph Options</h3>
+                <form method="POST" action="/explore">
+                    <div class="mb-3">
+                        <label class="form-label">Graph Type</label>
+                        <select class="form-select" name="graph_type" onchange="this.form.submit()">
+                            {% for key, value in graph_types.items() %}
+                                <option value="{{ key }}" {% if key == selected_graph %}selected{% endif %}>{{ value }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    {% if selected_graph in ['heatmap', 'cluster_profile'] %}
+                    <div class="mb-3">
+                        <label class="form-label">Color Scheme</label>
+                        <select class="form-select" name="color_scheme">
+                            <option value="YlOrBr">Yellow-Orange-Brown</option>
+                            <option value="tealrose">Teal-Rose</option>
+                            <option value="mint">Mint</option>
+                        </select>
+                    </div>
+                    {% endif %}
+                    
+                    {% if selected_graph in ['age_dist', 'income_spending'] %}
+                    <div class="mb-3">
+                        <label class="form-label">Feature to Analyze</label>
+                        <select class="form-select" name="feature" onchange="this.form.submit()">
+                            {% for feature in features %}
+                                <option value="{{ feature }}" {% if feature == selected_feature %}selected{% endif %}>
+                                    {{ feature }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% endif %}
+                    
+                    <button type="submit" class="btn btn-primary w-100 mt-2">
+                        <i class="bi bi-arrow-repeat me-2"></i>Update Graph
+                    </button>
+                </form>
+                
+                <hr>
+                
+                <h4 class="mt-3"><i class="bi bi-info-circle me-2"></i>Graph Descriptions</h4>
+                <div class="alert alert-info">
+                    <ul class="mb-0">
+                        <li><strong>3D Scatter:</strong> Interactive 3D view of clusters</li>
+                        <li><strong>Heatmap:</strong> Feature correlations</li>
+                        <li><strong>Cluster Profiles:</strong> Average values per cluster</li>
+                        <li><strong>Age Distribution:</strong> Box plots by cluster</li>
+                        <li><strong>Income vs Spending:</strong> Scatter plot with clusters</li>
+                        <li><strong>Gender Distribution:</strong> Bar chart by cluster</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-8">
+            <div class="visualization">
+                <h3><i class="bi bi-graph-up me-2"></i>{{ graph_types[selected_graph] }}</h3>
+                <div class="ratio ratio-16x9">
+                    {{ graph_html|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

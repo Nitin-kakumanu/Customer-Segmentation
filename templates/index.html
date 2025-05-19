@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto text-center">
+            <h1 class="display-5 fw-bold mb-3" style="color: var(--primary);">Customer Segmentation Dashboard</h1>
+            <p class="lead">Analyze customer behavior and identify key segments for targeted marketing</p>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-5">
+            <div class="form-section">
+                <h3><i class="bi bi-person-lines-fill me-2"></i>Individual Customer Analysis</h3>
+                <form method="POST" action="/">
+                    <div class="mb-3">
+                        <label class="form-label">Customer ID</label>
+                        <input type="number" class="form-control" name="customer_id" placeholder="Enter Customer ID">
+                        <small class="text-muted">Find an existing customer from the dataset</small>
+                    </div>
+                    <p class="text-center text-muted my-3">- OR -</p>
+                    <div class="mb-3">
+                        <label class="form-label">Age</label>
+                        <input type="number" class="form-control" name="age" placeholder="Enter age">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Annual Income (k$)</label>
+                        <input type="number" class="form-control" name="income" placeholder="Enter annual income">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Spending Score (1-100)</label>
+                        <input type="number" class="form-control" name="spending" min="1" max="100" placeholder="Enter spending score">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Gender (Optional)</label>
+                        <select class="form-select" name="gender">
+                            <option value="">Select Gender</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="bi bi-search me-2"></i>Analyze Customer
+                    </button>
+                </form>
+            </div>
+            
+            <div class="form-section">
+                <h3><i class="bi bi-upload me-2"></i>Bulk Processing</h3>
+                <form method="POST" action="/upload" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Upload Customer Data (Excel)</label>
+                        <input class="form-control" type="file" name="file" accept=".xlsx,.xls">
+                        <small class="text-muted">Upload an Excel file with customer data</small>
+                    </div>
+                    <button type="submit" class="btn btn-secondary w-100">
+                        <i class="bi bi-cloud-arrow-up me-2"></i>Upload and Process
+                    </button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="col-lg-7">
+            <div class="visualization">
+                <h3><i class="bi bi-3-circle me-2"></i>3D Cluster Visualization</h3>
+                <div class="ratio ratio-16x9">
+                    {{ plot_3d|safe }}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="visualization">
+                <h3><i class="bi bi-graph-down me-2"></i>Elbow Method</h3>
+                <img src="data:image/png;base64,{{ elbow_plot }}" class="img-fluid rounded">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="visualization">
+                <h3><i class="bi bi-grid-3x3 me-2"></i>Feature Correlation</h3>
+                <img src="data:image/png;base64,{{ correlation_plot }}" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+    
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="visualization">
+                <h3><i class="bi bi-bar-chart-line me-2"></i>Income vs Spending</h3>
+                <img src="data:image/png;base64,{{ income_spending_plot }}" class="img-fluid rounded">
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="visualization">
+                <h3><i class="bi bi-person-vcard me-2"></i>Age Distribution</h3>
+                <img src="data:image/png;base64,{{ age_dist_plot }}" class="img-fluid rounded">
+            </div>
+        </div>
+    </div>
+    
+    <div class="visualization mt-4">
+        <h3><i class="bi bi-table me-2"></i>Cluster Profiles</h3>
+        <img src="data:image/png;base64,{{ cluster_heatmap }}" class="img-fluid rounded mb-3">
+        {{ cluster_profiles|safe }}
+    </div>
+{% endblock %}

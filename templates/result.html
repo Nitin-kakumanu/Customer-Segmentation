@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <div class="row mb-4">
+        <div class="col-md-8 mx-auto text-center">
+            <h1 class="display-5 fw-bold mb-3" style="color: var(--primary);">Analysis Result</h1>
+        </div>
+    </div>
+    
+    {% if show_individual %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0"><i class="bi bi-person-badge me-2"></i>Customer Analysis</h3>
+                </div>
+                <div class="card-body">
+                    {% if customer_id %}
+                    <p><strong>Customer ID:</strong> {{ customer_id }}</p>
+                    {% else %}
+                    <p><strong>Age:</strong> {{ age }}</p>
+                    <p><strong>Annual Income:</strong> {{ income }}k$</p>
+                    <p><strong>Spending Score:</strong> {{ spending }}/100</p>
+                    {% if gender %}
+                    <p><strong>Gender:</strong> {{ gender }}</p>
+                    {% endif %}
+                    {% endif %}
+                    <div class="alert alert-secondary mt-3">
+                        <h5 class="alert-heading">Cluster Assignment</h5>
+                        <p class="mb-1"><strong>Cluster:</strong> <span class="badge bg-primary">{{ cluster }}</span></p>
+                        <hr>
+                        <p class="mb-0"><strong>Recommendation:</strong> {{ recommendation }}</p>
+                    </div>
+                    
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-3">
+                        <a href="/" class="btn btn-primary me-md-2">
+                            <i class="bi bi-house-door me-1"></i> Back to Dashboard
+                        </a>
+                        <a href="/explore" class="btn btn-secondary">
+                            <i class="bi bi-graph-up me-1"></i> Explore Graphs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+{% endblock %}
